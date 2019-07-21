@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_postalcodes/services/PostOffice.dart';
 import 'package:flutter_postalcodes/model/PostOffice.dart';
+import 'PinCodes.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -72,17 +73,34 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildPostOfficesList(BuildContext context, List<PostOffice> postOffices) {
-    return ListView(
-      children: postOffices.map((po) => _buildPostOffice(context, po)).toList(),
+    postOffices.sort((a, b) => a.pinCode.compareTo(b.pinCode));
+    Map<String, List<PostOffice>> byDivision = Map();
+    postOffices.forEach((po){
+      byDivision.putIfAbsent(po.division, () => new List());
+      byDivision[po.division].add(po);
+    });
+    List<String> keys = byDivision.keys.toList();
+    keys.sort((a, b) => a.compareTo(b));
+    return ListView.builder(
+      itemCount: keys.length,
+      itemBuilder: (context, i) {
+        return ExpansionTile(
+          initiallyExpanded: true,
+          title: Text(keys[i]),
+          children: byDivision[keys[i]].map((po) => _buildPostOffice(context, po)).toList(),
+        );
+      },
     );
   }
 
   Widget _buildPostOffice(BuildContext context, PostOffice po) {
     return ListTile(
       title: Text(po.name),
-      subtitle: Text(po.district),
+      subtitle: Text(po.branchType),
       leading: Text(po.pinCode),
-      trailing: Text(po.branchType),
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => PinCodesPage(pinCode: po.pinCode)));
+      },
     );
   }
 }
