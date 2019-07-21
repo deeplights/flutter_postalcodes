@@ -4,11 +4,13 @@ import 'package:http/http.dart' as http;
 
 import 'package:flutter_postalcodes/model/PostOffice.dart';
 
-Future<List<PostOffice>> loadPostOffices() async {
-  final response = await http.get('https://api.postalpincode.in/postoffice/New Delhi');
+Future<List<PostOffice>> loadPostOffices(String postOffice) async {
+  String requestURL = 'https://api.postalpincode.in/postoffice/$postOffice';
+  print(requestURL);
+  final response = await http.get(requestURL);
   if (response.statusCode == 200) {
     final responseBody = json.decode(response.body);
-//    print(responseBody);
+    print(responseBody);
     Iterable list = responseBody[0]['PostOffice'];
     return list.map((po) => PostOffice.fromJson(po)).toList();
   } else {
